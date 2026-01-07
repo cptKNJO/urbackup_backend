@@ -1,4 +1,4 @@
-import { Field, Checkbox } from "@fluentui/react-components";
+import { Field, Checkbox, CheckboxProps } from "@fluentui/react-components";
 import { useState } from "react";
 
 export function CheckboxField({
@@ -39,12 +39,13 @@ export function CheckboxFieldUncontrolled({
   id,
   name,
   defaultChecked,
+  ...props
 }: {
   label: string;
   id: string;
   name: string;
   defaultChecked: boolean;
-}) {
+} & Pick<CheckboxProps, "onChange">) {
   return (
     <Field>
       <Checkbox
@@ -52,6 +53,7 @@ export function CheckboxFieldUncontrolled({
         label={label}
         name={name}
         defaultChecked={defaultChecked}
+        {...props}
       />
     </Field>
   );

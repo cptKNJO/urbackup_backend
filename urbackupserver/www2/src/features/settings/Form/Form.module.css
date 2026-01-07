@@ -38,3 +38,28 @@
   display: block;
   margin-block-start: var(--spacingXL);
 }
+
+.form > :has([type="checkbox"]) {
+  --_margin: -8px;
+  /* Fix alignment with the text control labels */
+  margin-inline-start: var(--_margin);
+}
+
+.form > :has([type="checkbox"]) {
+  /* Fix alignment with the text control labels */
+  /* .form > :has([type="checkbox"]):has([type="text"]) { */
+  /* --_margin: 0px; */
+  /* background-color: red; */
+  /* margin-inline-start: 0px; */
+
+  * > [type="checkbox"] {
+    /* background-color: pink; */
+    /* --_margin: -99px; */
+    /* margin-inline-start: unset; */
+  }
+}
+
+input[readonly] {
+  background-color: var(--colorNeutralBackgroundStatic);
+  color: var(--colorNeutralForeground2);
+}

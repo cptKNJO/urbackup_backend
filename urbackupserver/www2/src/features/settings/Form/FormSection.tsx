@@ -14,11 +14,15 @@ export function FormSection<T extends string, Settings>({
   schema,
   initialFormState,
   onSubmit,
+  children,
+  button,
 }: {
   fields: Field<T>[];
   schema: ZodMiniObject;
   initialFormState: Record<string, SettingState["value"]>;
   onSubmit: (settings: Settings) => void;
+  children?: (validationMessages: Record<string, string>) => React.ReactNode;
+  button?: React.ReactNode;
 }) {
   const [validationMessages, setValidationMessages] = useState<
     Record<string, string>
@@ -33,6 +37,7 @@ export function FormSection<T extends string, Settings>({
 
     const formData = new FormData(ev.currentTarget);
 
+    // TODO: Only match the names for keys in fields.name
     const entries = {
       ...createBaseFormEntries(schema), // Get checkbox values if false
       ...Object.fromEntries(formData),
@@ -51,11 +56,14 @@ export function FormSection<T extends string, Settings>({
 
     resetValidationMessages();
 
-    onSubmit(parsed.data as Settings);
+    const transformedData = transformForSubmission(fields, parsed.data);
+
+    onSubmit(transformedData as Settings);
   };
 
   return (
     <Form onSubmit={handleSubmit} noValidate>
+      {children?.(validationMessages)}
       {fields.map((f) => {
         const initialValue = initialFormState[f.name];
 
@@ -88,9 +96,11 @@ export function FormSection<T extends string, Settings>({
         );
       })}
 
-      <Button type="submit" appearance="primary">
-        Save settings
-      </Button>
+      {button ?? (
+        <Button type="submit" appearance="primary">
+          Save settings
+        </Button>
+      )}
     </Form>
   );
 }
@@ -106,6 +116,25 @@ function createBaseFormEntries(schema: ZodMiniObject) {
   const keys = Object.entries(schema.def.shape);
 
   const result = keys.reduce((all, [k]) => ({ ...all, [k]: "" }), {});
+
+  return result;
+}
+
+function transformForSubmission<T extends string>(
+  fields: Field<T>[],
+  data: Record<string, any>,
+) {
+  const entries = Object.entries(data).map(([k, v]) => {
+    const matchInFields = fields.find((f) => f.name === k);
+
+    if (!matchInFields || !matchInFields.transformer) {
+      return [k, v];
+    }
+
+    return [k, matchInFields.transformer.api(v)];
+  });
+
+  const result = Object.fromEntries(entries);
 
   return result;
 }
